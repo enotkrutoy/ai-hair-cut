@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { GenerationResult, HairstyleConfig, LoadingState, Gender, Resolution } from '../types';
+import { GenerationResult, HairstyleConfig, LoadingState } from '../types';
 import { generateHairstyle, enhanceImage } from '../services/geminiService';
-import { ImageIcon, UploadIcon, SparklesIcon, DownloadIcon, XIcon, HeartIcon } from './ui/Icons';
+import { ImageIcon, UploadIcon, SparklesIcon, DownloadIcon, XIcon } from './ui/Icons';
 
 interface HairstyleStudioProps {
   onBack: () => void;
@@ -33,6 +33,7 @@ const HairstyleStudio: React.FC<HairstyleStudioProps> = ({ onBack }) => {
   const [history, setHistory] = useState<GenerationResult[]>([]);
   const [loading, setLoading] = useState<LoadingState>('idle');
   const [error, setError] = useState<string | null>(null);
+  const [billingError, setBillingError] = useState(false);
   const [mobileTab, setMobileTab] = useState<'studio' | 'gallery'>('studio');
   const [selectedResult, setSelectedResult] = useState<GenerationResult | null>(null);
   const [compareSlider, setCompareSlider] = useState(50);
@@ -60,21 +61,34 @@ const HairstyleStudio: React.FC<HairstyleStudioProps> = ({ onBack }) => {
       reader.onloadend = () => {
         setUploadedImage(reader.result as string);
         setIsEnhanced(false);
+        setError(null);
+        setBillingError(false);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleError = (err: any) => {
+    if (err.message === "BILLING_REQUIRED") {
+      setBillingError(true);
+      setError("Для генерации изображений необходимо включить биллинг (привязать карту) в Google AI Studio.");
+    } else {
+      setError(err.message || "Произошла ошибка при работе с ИИ.");
+    }
+    tg?.HapticFeedback.notificationOccurred('error');
   };
 
   const handleManualEnhance = async () => {
     if (!uploadedImage) return;
     setLoading('enhancing');
     setError(null);
+    setBillingError(false);
     try {
       const enhanced = await enhanceImage(uploadedImage);
       setUploadedImage(enhanced);
       setIsEnhanced(true);
     } catch (err: any) {
-      setError(err.message);
+      handleError(err);
     } finally {
       setLoading('idle');
     }
@@ -84,6 +98,7 @@ const HairstyleStudio: React.FC<HairstyleStudioProps> = ({ onBack }) => {
     if (!uploadedImage) return;
     setLoading('generating');
     setError(null);
+    setBillingError(false);
     try {
       const { generated, original } = await generateHairstyle(uploadedImage, config);
       const newRes: GenerationResult = {
@@ -94,8 +109,7 @@ const HairstyleStudio: React.FC<HairstyleStudioProps> = ({ onBack }) => {
       setMobileTab('gallery');
       tg?.HapticFeedback.notificationOccurred('success');
     } catch (err: any) {
-      setError(err.message);
-      tg?.HapticFeedback.notificationOccurred('error');
+      handleError(err);
     } finally {
       setLoading('idle');
     }
@@ -103,7 +117,6 @@ const HairstyleStudio: React.FC<HairstyleStudioProps> = ({ onBack }) => {
 
   return (
     <div className="h-full flex flex-col md:flex-row bg-dark-bg">
-      {/* Sidebar - Studio */}
       <div className={`w-full md:w-[380px] glass flex flex-col h-full z-10 ${mobileTab === 'studio' ? 'flex' : 'hidden md:flex'}`}>
         <div className="p-4 flex items-center justify-between border-b border-white/5">
           <h2 className="font-display font-bold text-neon-purple tracking-widest text-sm">FLUX PRO STUDIO</h2>
@@ -111,7 +124,22 @@ const HairstyleStudio: React.FC<HairstyleStudioProps> = ({ onBack }) => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
-          {error && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs">{error}</div>}
+          {error && (
+            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs space-y-2">
+              <p className="font-bold">Ошибка:</p>
+              <p>{error}</p>
+              {billingError && (
+                <a 
+                  href="https://aistudio.google.com/app/billing" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block mt-2 py-2 px-3 bg-red-500 text-white rounded-lg text-center font-bold"
+                >
+                  Перейти в настройки биллинга
+                </a>
+              )}
+            </div>
+          )}
 
           <div 
             onClick={() => fileInputRef.current?.click()} 
@@ -133,7 +161,7 @@ const HairstyleStudio: React.FC<HairstyleStudioProps> = ({ onBack }) => {
           </div>
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
 
-          {uploadedImage && !isEnhanced && (
+          {uploadedImage && !isEnhanced && !billingError && (
             <button 
               onClick={handleManualEnhance}
               className="w-full py-3 glass rounded-xl text-xs font-bold text-neon-blue flex items-center justify-center gap-2 border-neon-blue/20"
@@ -180,7 +208,6 @@ const HairstyleStudio: React.FC<HairstyleStudioProps> = ({ onBack }) => {
         </div>
       </div>
 
-      {/* Gallery */}
       <div className={`flex-1 relative flex flex-col ${mobileTab === 'gallery' ? 'flex' : 'hidden md:flex'}`}>
         <div className="p-4 border-b border-white/5 flex items-center justify-between">
           <div className="flex gap-4">
@@ -215,7 +242,6 @@ const HairstyleStudio: React.FC<HairstyleStudioProps> = ({ onBack }) => {
         </div>
       </div>
 
-      {/* Comparison Modal */}
       {selectedResult && (
         <div className="fixed inset-0 z-50 bg-black/95 flex flex-col animate-in fade-in duration-300">
           <div className="p-4 flex items-center justify-between glass z-10">
@@ -248,7 +274,6 @@ const HairstyleStudio: React.FC<HairstyleStudioProps> = ({ onBack }) => {
             <div 
               className="absolute top-0 bottom-0 w-1 bg-white cursor-ew-resize z-20 shadow-[0_0_15px_rgba(255,255,255,0.5)]"
               style={{ left: `${compareSlider}%` }}
-              onMouseDown={() => {}} // Handle drag
             >
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white shadow-xl flex items-center justify-center">
                 <div className="w-0.5 h-4 bg-gray-300 mx-0.5"></div>
@@ -274,7 +299,6 @@ const HairstyleStudio: React.FC<HairstyleStudioProps> = ({ onBack }) => {
         </div>
       )}
 
-      {/* Mobile Nav */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 glass flex items-center justify-around p-3 z-40 border-t border-white/5">
         <button 
           onClick={() => setMobileTab('studio')}

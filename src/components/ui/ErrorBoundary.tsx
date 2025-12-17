@@ -1,5 +1,5 @@
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { ErrorInfo, ReactNode } from 'react';
 
 interface Props {
   children: ReactNode;
@@ -10,9 +10,10 @@ interface State {
   error?: Error;
 }
 
-// Updated class to extend Component<Props, State> directly to ensure this.props and this.state are correctly typed
-export class ErrorBoundary extends Component<Props, State> {
-  public override state: State = {
+// Fixed ErrorBoundary: Explicitly extending React.Component and removing 'override' keywords to resolve inheritance detection issues.
+export class ErrorBoundary extends React.Component<Props, State> {
+  // Initializing state without the override modifier to avoid resolution errors
+  public state: State = {
     hasError: false
   };
 
@@ -20,11 +21,13 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  // Standard React lifecycle method without the problematic override modifier
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Uncaught error:', error, errorInfo);
   }
 
-  public override render() {
+  // Standard React render method without the problematic override modifier
+  public render() {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-dark-bg flex flex-col items-center justify-center p-6 text-center">
@@ -47,7 +50,7 @@ export class ErrorBoundary extends Component<Props, State> {
       );
     }
 
-    // Accessing children from this.props which is correctly typed via the Component generics
+    // Accessing children from this.props which is correctly typed via the React.Component generics
     return this.props.children;
   }
 }
