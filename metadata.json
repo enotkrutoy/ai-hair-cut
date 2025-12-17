@@ -1,5 +1,7 @@
 {
-  "name": "1 astoria-ai-studio",
-  "description": "Astoria AI Studio - Виртуальная примерка причёсок и реставрация фото на базе ИИ.",
-  "requestFramePermissions": []
+  "name": "Astoria AI Studio | Flux.1 Pro",
+  "description": "Передовой ИИ-стилист и инструмент для реставрации фото на базе Flux.1 и Gemini.",
+  "requestFramePermissions": [
+    "camera"
+  ]
 }

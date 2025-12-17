@@ -10,7 +10,8 @@ interface State {
   error?: Error;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
+// Explicitly extend React.Component to ensure props and state generics are correctly applied
+export class ErrorBoundary extends React.Component<Props, State> {
   public state: State = {
     hasError: false
   };
@@ -46,7 +47,7 @@ export class ErrorBoundary extends Component<Props, State> {
       );
     }
 
-    // Fix: In React class components, children must be accessed via this.props
+    // Correctly accessing children from this.props which is defined in the Props interface
     return this.props.children;
   }
 }

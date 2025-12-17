@@ -1,26 +1,15 @@
-
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
-  const apiKey = process.env.API_KEY || env.API_KEY;
+  const apiKey = process.env.API_KEY || env.VITE_API_KEY || env.API_KEY;
 
   return {
     plugins: [react()],
     define: {
       'process.env.API_KEY': JSON.stringify(apiKey || ''),
-      'process.env': JSON.stringify({})
-    },
-    test: {
-      globals: true,
-      environment: 'jsdom',
-      setupFiles: './src/test/setup.ts',
-    },
-    resolve: {
-      alias: {
-        '@': '/src',
-      },
+      'process.env.NODE_ENV': JSON.stringify(mode),
     },
     build: {
       outDir: 'dist',
@@ -28,12 +17,16 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks: {
-            vendor: ['react', 'react-dom'],
-            genai: ['@google/genai'],
+            'react-vendor': ['react', 'react-dom'],
+            'gemini-sdk': ['@google/genai'],
           },
         },
       },
-      chunkSizeWarningLimit: 1000,
+      chunkSizeWarningLimit: 1500,
     },
+    server: {
+      port: 3000,
+      host: true,
+    }
   };
 });
