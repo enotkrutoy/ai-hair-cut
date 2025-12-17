@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Astoria AI Studio | ИИ-стилист и реставрация</title>
+    <!-- Tailwind CDN kept for consistency with current styling setup -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
@@ -16,7 +17,7 @@
             },
             colors: {
               neon: {
-                purple: '#d946ef', // Pinker for beauty vibe
+                purple: '#d946ef',
                 blue: '#0ea5e9',
                 green: '#10b981',
                 red: '#f43f5e',
@@ -48,10 +49,10 @@
         color: #ffffff;
         height: 100%;
         width: 100%;
-        position: fixed; /* Critical for iOS to prevent rubber-banding and scroll chaining */
+        position: fixed;
         overflow: hidden;
         overscroll-behavior: none;
-        touch-action: pan-y; /* Allow vertical panning only inside scrollable areas */
+        touch-action: pan-y;
         -webkit-font-smoothing: antialiased;
       }
       #root {
@@ -61,7 +62,6 @@
         display: flex;
         flex-direction: column;
       }
-      /* Custom scrollbar */
       ::-webkit-scrollbar {
         width: 6px;
         height: 6px;
@@ -80,15 +80,20 @@
   <script type="importmap">
 {
   "imports": {
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
+    "vite": "https://aistudiocdn.com/vite@^7.2.6",
+    "@testing-library/jest-dom": "https://esm.sh/@testing-library/jest-dom@^6.9.1",
+    "vitest": "https://esm.sh/vitest@^4.0.16"
   }
 }
 </script>
 </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
