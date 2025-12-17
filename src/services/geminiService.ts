@@ -69,10 +69,11 @@ export const enhanceImage = async (base64: string): Promise<string> => {
     const response = await ai.models.generateContent({
       model: MODEL_NAME,
       contents: { parts: [{ inlineData: { data, mimeType } }, { text: prompt }] },
-      // safetySettings should be a top-level property of GenerateContentParameters
-      safetySettings: SAFETY_SETTINGS as any
+      config: { 
+        safetySettings: SAFETY_SETTINGS as any 
+      }
     });
-    const resultPart = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
+    const resultPart = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
     if (!resultPart?.inlineData) throw new Error("Restoration failed");
     return `data:${resultPart.inlineData.mimeType};base64,${resultPart.inlineData.data}`;
   });
@@ -102,10 +103,11 @@ export const generateHairstyle = async (base64: string, config: HairstyleConfig)
     const response = await ai.models.generateContent({
       model: MODEL_NAME,
       contents: { parts: [{ inlineData: { data, mimeType } }, { text: prompt }] },
-      // safetySettings should be a top-level property of GenerateContentParameters
-      safetySettings: SAFETY_SETTINGS as any
+      config: { 
+        safetySettings: SAFETY_SETTINGS as any 
+      }
     });
-    const resultPart = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
+    const resultPart = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
     if (!resultPart?.inlineData) throw new Error("Generation failed");
     return {
       generated: `data:${resultPart.inlineData.mimeType};base64,${resultPart.inlineData.data}`,
@@ -121,10 +123,11 @@ export const generateCharacterImage = async (desc: string, style: string) => {
   const res = await ai.models.generateContent({
     model: MODEL_NAME,
     contents: { parts: [{ text: prompt }] },
-    // safetySettings should be a top-level property of GenerateContentParameters
-    safetySettings: SAFETY_SETTINGS as any
+    config: { 
+      safetySettings: SAFETY_SETTINGS as any 
+    }
   });
-  const part = res.candidates?.[0]?.content?.parts.find(p => p.inlineData);
+  const part = res.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
   return part?.inlineData ? `data:${part.inlineData.mimeType};base64,${part.inlineData.data}` : "";
 };
 
@@ -136,9 +139,10 @@ export const generateSceneImage = async (base: string, char: string, scene: stri
   const res = await ai.models.generateContent({
     model: MODEL_NAME,
     contents: { parts: [{ inlineData: { data, mimeType } }, { text: prompt }] },
-    // safetySettings should be a top-level property of GenerateContentParameters
-    safetySettings: SAFETY_SETTINGS as any
+    config: { 
+      safetySettings: SAFETY_SETTINGS as any 
+    }
   });
-  const part = res.candidates?.[0]?.content?.parts.find(p => p.inlineData);
+  const part = res.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
   return part?.inlineData ? `data:${part.inlineData.mimeType};base64,${part.inlineData.data}` : "";
 };

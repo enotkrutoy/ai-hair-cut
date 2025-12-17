@@ -10,9 +10,9 @@ interface State {
   error?: Error;
 }
 
-// Explicitly extend React.Component to ensure props and state generics are correctly applied
-export class ErrorBoundary extends React.Component<Props, State> {
-  public state: State = {
+// Updated class to extend Component<Props, State> directly to ensure this.props and this.state are correctly typed
+export class ErrorBoundary extends Component<Props, State> {
+  public override state: State = {
     hasError: false
   };
 
@@ -20,11 +20,11 @@ export class ErrorBoundary extends React.Component<Props, State> {
     return { hasError: true, error };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Uncaught error:', error, errorInfo);
   }
 
-  public render() {
+  public override render() {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-dark-bg flex flex-col items-center justify-center p-6 text-center">
@@ -47,7 +47,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
       );
     }
 
-    // Correctly accessing children from this.props which is defined in the Props interface
+    // Accessing children from this.props which is correctly typed via the Component generics
     return this.props.children;
   }
 }
